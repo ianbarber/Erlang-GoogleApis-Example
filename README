@@ -1,4 +1,15 @@
-Very rough example of querying the Google Discovery APIs and retrieving data from Google+ using Erlang. This is certainly not a complete Discovery client implementation, but contains most of the required ingredients for creating one! 
+Very rough example of querying the Google Discovery APIs (https://developers.google.com/discovery/) and retrieving data from Google+ using Erlang. This is certainly not a complete Discovery client implementation, but contains most of the required ingredients for creating one! 
+
+==== Links from the talk
+
+Developer Console
+https://developers.google.com/console
+API Explorer
+https://developers.google.com/apis-explorer/#p/
+API Explorer Sourcecode
+http://code.google.com/p/google-apis-explorer/source/checkout
+
+==== Code Examples
 
 Requires the mochijson2 library. 
 
