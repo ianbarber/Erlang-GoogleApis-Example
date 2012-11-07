@@ -1,27 +1,39 @@
-Very rough example of querying the Google Discovery APIs and retrieving data from Google+ using Erlang. This is certainly not a complete Discovery client implementation, but contains most of the required ingredients for creating one!
+Very rough example of querying the Google Discovery APIs and retrieving data from Google+ using Erlang. This is certainly not a complete Discovery client implementation, but contains most of the required ingredients for creating one! 
 
 Requires the mochijson2 library. 
 
 erl -pa /path/to/mochijson2/ebin
 
-Get these values from the Devconsole: http://developers.google.com/console
+API access. Get these values from the Devconsole: http://developers.google.com/console
+If following along you'll need to create a Simple API Key, and a OAuth Web ClientID. Enable the Google+ API in the Services tab.
 
 RedirectURL = "http://localhost:8080/oauth2callback".
 ClientID = "". %% For OAuth
 ClientSecret = "". %% For OAuth
 APIKey = "". %% For Simple API usage
 
+%% Start service
 plus_srv:start_link(APIKey, ClientID, ClientSecret, RedirectURL).
+%% Retrieve a list of available APIs from the Discovery Document
 AllApis = plus_srv:list_apis().
 lists:foreach(fun({N,U}) -> io:format("API: ~s~n~s~n--------~n", [N,U]) end, AllApis).
+%% Use the Google+ API
 plus_srv:set_api("https://www.googleapis.com/discovery/v1/apis/plus/v1/rest").
+%% List methods in the basic Google+ API
 plus_srv:list_methods().
+%% Search for mentions of Erlang on Google+
 {ok, Activities} = plus_srv:call_method("plus.activities.search", [{"query", "erlang"}], []).
 Items = proplists:get_value(<<"items">>, Activities).
 lists:foreach(fun({struct, I}) -> io:format("Title: ~s~n--------~n", [proplists:get_value(<<"title">>, I)]) end, Items).
+%% Call profile retrieval - will return an auth error
 plus_srv:call_method("plus.people.get", [{"userId", "me"}], []).
+%% Show the scopes required for people.get
 plus_srv:list_scopes("plus.people.get").
+%% Generate a token URL to paste in the browser 
+%% - grab the code and state params from there for the next call
 plus_srv:gen_token_url("https://www.googleapis.com/auth/plus.me").
+%% Exchange the code for an auth token
 plus_srv:exchange_token("", "").
+%% Retrieve profile data from Google+
 {ok, Person} = plus_srv:call_method("plus.people.get", [{"userId", "me"}], []).
 io:format("~s: ~s~n", [proplists:get_value(<<"displayName">>, Person), proplists:get_value(<<"url">>, Person)]).
