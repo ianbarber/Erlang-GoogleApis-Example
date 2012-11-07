@@ -1,0 +1,27 @@
+Very rough example of querying the Google Discovery APIs and retrieving data from Google+ using Erlang. This is certainly not a complete Discovery client implementation, but contains most of the required ingredients for creating one!
+
+Requires the mochijson2 library. 
+
+erl -pa /path/to/mochijson2/ebin
+
+Get these values from the Devconsole: http://developers.google.com/console
+
+RedirectURL = "http://localhost:8080/oauth2callback".
+ClientID = "". %% For OAuth
+ClientSecret = "". %% For OAuth
+APIKey = "". %% For Simple API usage
+
+plus_srv:start_link(APIKey, ClientID, ClientSecret, RedirectURL).
+AllApis = plus_srv:list_apis().
+lists:foreach(fun({N,U}) -> io:format("API: ~s~n~s~n--------~n", [N,U]) end, AllApis).
+plus_srv:set_api("https://www.googleapis.com/discovery/v1/apis/plus/v1/rest").
+plus_srv:list_methods().
+{ok, Activities} = plus_srv:call_method("plus.activities.search", [{"query", "erlang"}], []).
+Items = proplists:get_value(<<"items">>, Activities).
+lists:foreach(fun({struct, I}) -> io:format("Title: ~s~n--------~n", [proplists:get_value(<<"title">>, I)]) end, Items).
+plus_srv:call_method("plus.people.get", [{"userId", "me"}], []).
+plus_srv:list_scopes("plus.people.get").
+plus_srv:gen_token_url("https://www.googleapis.com/auth/plus.me").
+plus_srv:exchange_token("", "").
+{ok, Person} = plus_srv:call_method("plus.people.get", [{"userId", "me"}], []).
+io:format("~s: ~s~n", [proplists:get_value(<<"displayName">>, Person), proplists:get_value(<<"url">>, Person)]).
